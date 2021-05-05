@@ -92,5 +92,3 @@ plot(1:17,AcuracyCorte, type = "l", col = "red", xlab = "Meses", ylab = "Acurác
          legend = c('Normal','Ponto de Corte'),
          col = c("blue", "red"), lty = 1, lwd=1, pch = 1, 
          bg='transparent', bty = "n")
-?points
-    
