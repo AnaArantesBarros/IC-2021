@@ -1,4 +1,4 @@
-####FunÁıes
+####Fun√ß√µes
 cutoff <- function (prediction, cana) {
   ponto <- seq(0.2,0.8,by=0.001)
   acuracia <- array(NA, dim=length(ponto))
@@ -14,11 +14,11 @@ cutoff <- function (prediction, cana) {
 ####Programa principal
 library(caret)
 
-setwd("C:/Users/Ana/Documents/ProgramaÁ„o R/IC")
+setwd("C:/Users/Ana/Documents/Programa√ß√£o R/IC")
 data <- read.csv("tabelaNAfix2015_2016 - Area6.csv")
 
 
-####Organizando dados de referÍncia
+####Organizando dados de refer√™ncia
 data$Classif[data$Classif == "CANA"]  <- 1
 data$Classif[data$Classif == "OUTROS"] <- 0
 data$Classif[data$Classif == "URBANA"]  <- 0
@@ -33,12 +33,12 @@ AnoUm <- data[ ,c(16,18,24,25,26,28,34,35,36,38,44,45,46,48,54,55,
                   156,158,164,165,166,168,174,175,176,178,184,185 )]
 
 
-####Definindo conjunto de treino e de validaÁ„o
+####Definindo conjunto de treino e de valida√ß√£o
 nT <- round(0.8*nrow(AnoUm), 0)
 nTest <- round(0.2*nrow(AnoUm), 0)
-set.seed(7) #definir semente para a pesquisa ser reproduzÌvel
-idxT <- sort(sample(1:nrow(AnoUm), nT)) #sorteia e ordena os Ìndices do treino
-idxTest <- setdiff(1:nrow(AnoUm),idxT) #pega os demais Ìndices para teste
+set.seed(7) #definir semente para a pesquisa ser reproduz√≠vel
+idxT <- sort(sample(1:nrow(AnoUm), nT)) #sorteia e ordena os √≠ndices do treino
+idxTest <- setdiff(1:nrow(AnoUm),idxT) #pega os demais √≠ndices para teste
 
 covT      <- AnoUm[idxT,]
 covTest   <- AnoUm[idxTest,]
@@ -46,13 +46,13 @@ classT    <- Classif[idxT]
 classTest <- Classif[idxTest]
 
 
-####Armazenamento das prediÁıes
+####Armazenamento das predi√ß√µes
 resultados <- data.frame( JA = 0, FE = 0, MA = 0, AB = 0, MI = 0,
                          JU = 0, JL = 0, AG = 0, SE = 0, OU = 0, NO = 0, DE = 0, 
                          JA2 = 0, FE2 = 0, MA2 = 0, AB2 = 0, MI2 = 0, cana = classTest)               
 
 
-####Calculo de modelos e prediÁ„o
+####Calculo de modelos e predi√ß√£o
 for (i in indices){
 dataFitT <- data.frame(cana = classT,
                        nd = covT[,i],
@@ -75,7 +75,7 @@ resultados[ ,match(i, indices)] <- as.factor(ifelse(dataFitTest$prediction > p, 
 
 confusionMatrix(resultados[ ,10], dataFitTest$cana, positive="1") #70.51%
 
-####An·lise de acur·cia
+####An√°lise de acur√°cia
 AcuracyCorte <- c(65.78,63.59,67.99,68.77,68.80,69.27,69.67,68.04,70.33,70.51,
                   68.97,67.22,65.13,67.91,66.59,69.39,70.07)
 mc <- max(AcuracyCorte)
@@ -85,8 +85,8 @@ match(mn, AcuracyNormal)
 AcuracyNormal <- c(64.93,63.30,63.57,64.95,68.84,69.36,68.72,68.65,69.83,70.18,
                    68.53,67.16,65.01,64.58,66.19,68.74,70.07)
 
-plot(1:17,AcuracyCorte, type = "l", col = "red", xlab = "Meses", ylab = "Acur·cia",
-     main = "ComparaÁ„o de acur·cia",) 
+plot(1:17,AcuracyCorte, type = "l", col = "red", xlab = "Meses", ylab = "Acur√°cia",
+     main = "Compara√ß√£o de acur√°cia",) 
   lines(1:17, AcuracyNormal, col = "blue")
   legend('topleft',
          legend = c('Normal','Ponto de Corte'),
