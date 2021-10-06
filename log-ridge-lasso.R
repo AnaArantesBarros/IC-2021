@@ -1,4 +1,4 @@
-####Função para encontrar valor de corte ótimo para cada mês
+####FunÃ§Ã£o para encontrar valor de corte Ã³timo para cada mÃªs
 cutoff <- function (prediction, cana) {
   ponto <- seq(0.2,0.8,by=0.01)
   acuracia <- array(NA, dim=length(ponto))
@@ -14,20 +14,20 @@ cutoff <- function (prediction, cana) {
 ####Programa principal, importando data
 library(caret)
 library(glmnet)
-setwd("C:/Users/Ana/Documents/Programação R/IC")
+setwd("C:/Users/Ana/Documents/ProgramaÃ§Ã£o R/IC")
 data <- read.csv("tabelaNAfix2015_2016 - Area6.csv")
 
 
-####Organizando dados de referência
-##A predição que nos interessa será classificada como 1, as demais como 0.
+####Organizando dados de referÃªncia
+##A prediÃ§Ã£o que nos interessa serÃ¡ classificada como 1, as demais como 0.
 data$Classif[data$Classif == "CANA"]  <- 1
 data$Classif[data$Classif == "OUTROS"] <- 0
 data$Classif[data$Classif == "URBANA"]  <- 0
 
 data$Classif <- factor(data$Classif)
 Classif <- data$Classif
-##Selecionando as colunas que serão utilizadas
-#Neste caso os indices em data iniciam na 18 e se repetem a cada 10 até a coluna 185
+##Selecionando as colunas que serÃ£o utilizadas
+#Neste caso os indices em data iniciam na 18 e se repetem a cada 10 atÃ© a coluna 185
 colunas <- c(
   seq(from = 16, to = 185, by = 10),
   seq(from = 17, to = 185, by = 10),
@@ -38,26 +38,26 @@ colunas <- c(
   186)
 AnoUm <- data[ ,c(colunas)]
 
-####Definindo conjunto de treino e de validação
+####Definindo conjunto de treino e de validaÃ§Ã£o
 nT <- round(0.8*nrow(AnoUm), 0)
 nTest <- round(0.2*nrow(AnoUm), 0)
-set.seed(7) #definir semente para a pesquisa ser reproduzível
-idxT <- sort(sample(1:nrow(AnoUm), nT)) #sorteia e ordena os índices do treino
-idxTest <- setdiff(1:nrow(AnoUm),idxT) #pega os demais índices para teste
+set.seed(7) #definir semente para a pesquisa ser reproduzÃ­vel
+idxT <- sort(sample(1:nrow(AnoUm), nT)) #sorteia e ordena os Ã­ndices do treino
+idxTest <- setdiff(1:nrow(AnoUm),idxT) #pega os demais Ã­ndices para teste
 
 covT      <- AnoUm[idxT,]
 covTest   <- AnoUm[idxTest,]
 classT    <- Classif[idxT] 
 classTest <- Classif[idxTest]
-####Armazenamento das predições
-###Data frame para armazenar as predições por mês e uma coluna com a classificação real
+####Armazenamento das prediÃ§Ãµes
+###Data frame para armazenar as prediÃ§Ãµes por mÃªs e uma coluna com a classificaÃ§Ã£o real
 resultados <- data.frame( JA = 0, FE = 0, MA = 0, AB = 0, MI = 0,
                           JU = 0, JL = 0, AG = 0, SE = 0, OU = 0, NO = 0, DE = 0, 
                           JA2 = 0, FE2 = 0, MA2 = 0, AB2 = 0, MI2 = 0, cana = classTest)
 
 
-####Calculo de modelos e predição
-###Data frame com os indices nd, nw, ev, ls, s1 e s1 dos meses 1 até 17.
+####Calculo de modelos e prediÃ§Ã£o
+###Data frame com os indices nd, nw, ev, ls, s1 e s1 dos meses 1 atÃ© 17.
 dataFitT <- data.frame(cana = classT,
                        nd1 = covT[ ,1],nd2= covT[ ,2] ,nd3= covT[ ,3],nd4= covT[ ,4],
                        nd5= covT[ ,5],nd6= covT[ ,6],nd7= covT[ ,7],nd8= covT[ ,8],
@@ -89,36 +89,36 @@ dataFitT <- data.frame(cana = classT,
 x <- model.matrix(cana~.,dataFitT)[,-1]
 y <- covT$Classif
 
-#Modelo Regressão Logistica sem penalização
+#Modelo RegressÃ£o Logistica sem penalizaÃ§Ã£o
 mod1 <- glmnet(x, y, alpha = 0, family = "binomial", lambda = 0)
 summary(mod1)
-#Modelo Regressão Logistica com penalização ridge
+#Modelo RegressÃ£o Logistica com penalizaÃ§Ã£o ridge
 mod2 <- cv.glmnet(x, y, family = "binomial", alpha = 0)
 
-#Modelo Regressão Logistica com penalização lasso
+#Modelo RegressÃ£o Logistica com penalizaÃ§Ã£o lasso
 mod3 <- cv.glmnet(x, y, family = "binomial", alpha = 1)
 
 
 
-#Predição1 Treino (sem penalização)
+#PrediÃ§Ã£o1 Treino (sem penalizaÃ§Ã£o)
 dataFitT$prediction1 <- predict(mod1, s=0, newx=x, type="response")
 p1 <- cutoff(dataFitT$prediction1, dataFitT$cana)
 resultados01 <- as.factor(ifelse(dataFitT$prediction1 > p1, "1", "0"))
 confusionMatrix(resultados01, dataFitT$cana, positive="1")
 
-#Predição2 Treino (penalização ridge)
+#PrediÃ§Ã£o2 Treino (penalizaÃ§Ã£o ridge)
 dataFitT$prediction2 <- predict(mod2, s=mod2$lambda.1se, newx=x, type="response")
 p2 <- cutoff(dataFitT$prediction2, dataFitT$cana)
 resultados02 <- as.factor(ifelse(dataFitT$prediction2 > p2, "1", "0"))
 confusionMatrix(resultados02, dataFitT$cana, positive="1")
 
-#Predição3 Treino (penalização lasso)
+#PrediÃ§Ã£o3 Treino (penalizaÃ§Ã£o lasso)
 dataFitT$prediction3 <- predict(mod3, s=mod3$lambda.1se, newx=x, type="response")
 p3 <- cutoff(dataFitT$prediction3, dataFitT$cana)
 resultados03 <- as.factor(ifelse(dataFitT$prediction3 > p3, "1", "0"))
 confusionMatrix(resultados03, dataFitT$cana, positive="1")
 
-##Precisamos utilizar um data frame só com os dados teste
+##Precisamos utilizar um data frame sÃ³ com os dados teste
 dataFitTest <- data.frame(cana = classTest,
                           nd1 = covTest[ ,1],nd2= covTest[ ,2] ,nd3= covTest[ ,3],nd4= covTest[ ,4],
                           nd5= covTest[ ,5],nd6= covTest[ ,6],nd7= covTest[ ,7],nd8= covTest[ ,8],
@@ -147,28 +147,28 @@ dataFitTest <- data.frame(cana = classTest,
                           s215 = covTest[ ,100],s216 = covTest[ ,101],s217 = covTest[ ,102])
 
 
-##Fazendo a predição com o modelo montado anteriormente
+##Fazendo a prediÃ§Ã£o com o modelo montado anteriormente
 x.test <- model.matrix(cana~.,dataFitTest)[,-1]
 
-#Predição1 Teste (sem penalização)
+#PrediÃ§Ã£o1 Teste (sem penalizaÃ§Ã£o)
 dataFitTest$prediction1 <- predict(mod1, s=0, newx=x.test, type="response")
 p1 <- cutoff(dataFitTest$prediction1, dataFitTest$cana)
 resultados1 <- as.factor(ifelse(dataFitTest$prediction1 > p1, "1", "0"))
 confusionMatrix(resultados1, dataFitTest$cana, positive="1")
 
-#Predição2 Teste (penalização ridge)
+#PrediÃ§Ã£o2 Teste (penalizaÃ§Ã£o ridge)
 dataFitTest$prediction2 <- predict(mod2, s=mod2$lambda.1se, newx=x.test, type="response")
 p2 <- cutoff(dataFitTest$prediction2, dataFitTest$cana)
 resultados2 <- as.factor(ifelse(dataFitTest$prediction2 > p2, "1", "0"))
 confusionMatrix(resultados2, dataFitTest$cana, positive="1")
 
-#Predição3 Teste (penalização lasso)
+#PrediÃ§Ã£o3 Teste (penalizaÃ§Ã£o lasso)
 dataFitTest$prediction3 <- predict(mod3, s=mod3$lambda.1se, newx=x.test, type="response")
 p3 <- cutoff(dataFitTest$prediction3, dataFitTest$cana)
 resultados3 <- as.factor(ifelse(dataFitTest$prediction3 > p3, "1", "0"))
 confusionMatrix(resultados3, dataFitTest$cana, positive="1")
 
-#Criação de banco de dados
+#CriaÃ§Ã£o de banco de dados
 dadoscsv <- data.frame(RegLog = as.numeric(resultados01)-1,
                        Ridge = as.numeric(resultados02)-1,
                        Lasso = as.numeric(resultados03)-1)
@@ -205,9 +205,9 @@ rocobj3 <- roc(as.numeric(dataFitTest$cana), as.numeric(resultados3))
 auc3 <- round(auc(as.numeric(dataFitTest$cana), as.numeric(resultados3)),4)
 #create ROC plot
 
-roclist <- list("Regressão Logística" = rocobj1,
-                "Regressão com penalização Ridge" = rocobj2,
-                "Regressão com penalização Lasso" = rocobj3)
+roclist <- list("RegressÃ£o LogÃ­stica" = rocobj1,
+                "RegressÃ£o com penalizaÃ§Ã£o Ridge" = rocobj2,
+                "RegressÃ£o com penalizaÃ§Ã£o Lasso" = rocobj3)
 
 #create ROC plot
 ggroc(roclist, aes = "linetype", legacy.axes = TRUE) +
